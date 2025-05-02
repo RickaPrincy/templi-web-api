@@ -1,12 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiPagination, ApiRequiredSpec } from '../openapi/decorators';
-import { Dummy } from 'src/models';
-import {
-  Pagination,
-  PaginationParams,
-} from '../decorators/pagination.decorator';
-import { HealthService } from 'src/services';
+import { ApiPagination, ApiRequiredSpec } from '../swagger/decorator';
+import { Dummy } from 'src/model';
+import { Pagination, PaginationParams } from '../decorator';
+import { HealthService } from 'src/service';
 
 @Controller()
 @ApiTags('Health')

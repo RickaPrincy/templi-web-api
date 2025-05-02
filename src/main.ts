@@ -16,6 +16,7 @@ function setupSwagger<T>(app: INestApplication<T>) {
     .setVersion('0.0.1')
     .addServer('https://templi.vercel.app')
     .addTag('Health')
+    .addTag('Security')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, openapiConfig);

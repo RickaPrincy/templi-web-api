@@ -1,0 +1,144 @@
+openapi: 3.0.0
+paths:
+  /ping:
+    get:
+      operationId: ping
+      parameters: []
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: ''
+      summary: ''
+      tags:
+        - Health
+  /dummies:
+    get:
+      operationId: getDummies
+      parameters:
+        - name: page
+          required: false
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            default: 1
+        - name: pageSize
+          required: false
+          in: query
+          schema:
+            type: number
+            default: 10
+            minimum: 1
+            maximum: 500
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dummy'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      summary: ''
+      tags:
+        - Health
+  /login:
+    post:
+      operationId: SecurityController_login
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+        - Security
+  /auth/github/callback:
+    post:
+      operationId: SecurityController_handleAuthAndInstallationCallback
+      parameters:
+        - name: code
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: installation_id
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+      tags:
+        - Security
+info:
+  title: Templi
+  description: >-
+    Templi is a tool that simplifies boilerplate creation and usage, available
+    as both a library and a CLI.
+  version: 0.0.1
+  contact: {}
+tags:
+  - name: Health
+    description: ''
+  - name: Security
+    description: ''
+servers:
+  - url: https://templi.vercel.app
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    Dummy:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
+    ApiResponseError:
+      type: object
+      properties:
+        statusCode:
+          type: number
+        message:
+          type: string
+        error:
+          type: string
+      required:
+        - statusCode
+        - message
+        - error

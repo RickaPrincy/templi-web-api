@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { Max, IsInt, Min, validate } from 'class-validator';
-import { MAX_ITEM_PER_PAGE } from '../openapi/decorators';
+import { MAX_ITEM_PER_PAGE } from '../swagger/decorator';
 
 export class PaginationParams {
   @IsInt()

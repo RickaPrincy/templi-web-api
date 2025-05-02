@@ -2,8 +2,8 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Dummy } from 'src/models';
-import { PaginationParams } from 'src/rest/decorators';
+import { Dummy } from 'src/model';
+import { PaginationParams } from 'src/rest/decorator';
 import { createPagination } from './utils/create-pagination';
 
 const DUMMIES: Dummy[] = [
@@ -28,9 +28,15 @@ export class HealthService {
   ) {}
 
   async getDummies(pagination: PaginationParams) {
-    await this.repository.save(
-      DUMMIES.map((dummy) => this.repository.create(dummy)),
-    );
-    return this.repository.find(createPagination(pagination));
+    const dummies = await this.repository.find(createPagination(pagination));
+
+    /* TODO: refactor (LAZY MODE) */
+    if (dummies.length === 0) {
+      await this.repository.save(
+        DUMMIES.map((dummy) => this.repository.create(dummy)),
+      );
+      return DUMMIES;
+    }
+    return dummies;
   }
 }

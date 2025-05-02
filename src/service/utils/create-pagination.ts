@@ -1,5 +1,5 @@
 import { FindManyOptions } from 'typeorm';
-import { PaginationParams } from 'src/rest/decorators';
+import { PaginationParams } from 'src/rest/decorator';
 
 export function createPagination(
   pagination: PaginationParams,

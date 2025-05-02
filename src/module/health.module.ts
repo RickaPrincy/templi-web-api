@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Dummy } from 'src/models';
-import { HealthController } from 'src/rest/endpoints';
-import { HealthService } from 'src/services';
+import { Dummy } from 'src/model';
+import { HealthController } from 'src/rest/controller';
+import { HealthService } from 'src/service';
 
 @Module({
   providers: [HealthService],
