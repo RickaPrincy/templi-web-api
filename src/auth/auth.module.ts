@@ -8,6 +8,7 @@ import { User } from 'src/model';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { GithubModule } from 'src/module';
+import { JwtStrategy } from './strategy';
 
 @Global()
 @Module({
@@ -28,7 +29,7 @@ import { GithubModule } from 'src/module';
       },
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

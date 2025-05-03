@@ -8,10 +8,10 @@ export class Whoami {
   name: string;
 
   @ApiProperty()
-  email: string;
+  email?: string;
 
   @ApiProperty()
-  avatar: string;
+  avatar?: string;
 
   @ApiProperty()
   token: string;

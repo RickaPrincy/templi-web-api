@@ -1,5 +1,59 @@
 openapi: 3.0.0
 paths:
+  /auth/github/callback:
+    get:
+      operationId: AuthController_handleGithubAppCallback
+      parameters:
+        - name: code
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Security
+  /whoami:
+    get:
+      operationId: whoami
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Whoami'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      security:
+        - bearer: []
+      summary: ''
+      tags:
+        - Security
   /ping:
     get:
       operationId: ping
@@ -69,34 +123,6 @@ paths:
       summary: ''
       tags:
         - Health
-  /login:
-    post:
-      operationId: SecurityController_login
-      parameters: []
-      responses:
-        '201':
-          description: ''
-      tags:
-        - Security
-  /auth/github/callback:
-    post:
-      operationId: SecurityController_handleAuthAndInstallationCallback
-      parameters:
-        - name: code
-          required: true
-          in: query
-          schema:
-            type: string
-        - name: installation_id
-          required: true
-          in: query
-          schema:
-            type: string
-      responses:
-        '201':
-          description: ''
-      tags:
-        - Security
 info:
   title: Templi
   description: >-
@@ -118,7 +144,7 @@ components:
       bearerFormat: JWT
       type: http
   schemas:
-    Dummy:
+    Whoami:
       type: object
       properties:
         id:
@@ -126,9 +152,18 @@ components:
           format: uuid
         name:
           type: string
+        email:
+          type: string
+        avatar:
+          type: string
+        token:
+          type: string
       required:
         - id
         - name
+        - email
+        - avatar
+        - token
     ApiResponseError:
       type: object
       properties:
@@ -142,3 +177,14 @@ components:
         - statusCode
         - message
         - error
+    Dummy:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
