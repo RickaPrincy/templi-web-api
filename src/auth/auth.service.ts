@@ -57,7 +57,7 @@ export class AuthService {
     return `${uiURL}/${AuthService._UI_CALLBACK_PREFIX}?token=${token}`;
   }
 
-  async handleUserSignup(user: User) {
+  private async handleUserSignup(user: User) {
     const persistedUser = await this.userRepository.findOneBy({
       githubId: user.githubId,
     });
