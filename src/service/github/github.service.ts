@@ -1,32 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OAuthApp } from '@octokit/oauth-app';
+
 import { Octokit } from '@octokit/rest';
+import { AuthInterface } from '@octokit/auth-app/dist-types/types';
+import { createAppAuth } from '@octokit/auth-app';
 
 @Injectable()
 export class GithubService {
-  private _oauthApp: OAuthApp;
+  private appAuth: AuthInterface;
 
   constructor(private readonly configService: ConfigService) {
-    this._oauthApp = new OAuthApp({
-      clientType: 'oauth-app',
+    this.appAuth = createAppAuth({
+      appId: +this.configService.get('GITHUB_APP_ID')!,
       clientId: this.configService.get('GITHUB_CLIENT_ID')!,
       clientSecret: this.configService.get('GITHUB_CLIENT_SECRET')!,
+      privateKey: this.configService.get('GITHUB_PRIVATE_KEY')!,
     });
   }
 
-  async createToken(code: string) {
-    const { authentication } = await this._oauthApp.createToken({
-      code,
-    });
-
-    return authentication.token;
+  async createOAuthUserOctokit(token: string): Promise<Octokit> {
+    return new Octokit({ auth: token });
   }
 
-  async getUserInfo(token: string) {
-    const octokit = new Octokit({ auth: token });
+  async createInstallationOctokit(installationId: string): Promise<Octokit> {
+    return new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId: +this.configService.get('GITHUB_APP_ID')!,
+        clientId: this.configService.get('GITHUB_CLIENT_ID')!,
+        clientSecret: this.configService.get('GITHUB_CLIENT_SECRET')!,
+        privateKey: this.configService.get('GITHUB_PRIVATE_KEY')!,
+        installationId: +installationId,
+      },
+    });
+  }
+
+  async getUserInfo(code: string) {
+    const authentication = await this.appAuth(
+      { type: 'oauth-user', code } as any /* ARGHHHHHHH */,
+    );
+    const octokit = await this.createOAuthUserOctokit(authentication.token);
 
     const { data: user } = await octokit.users.getAuthenticated();
     return user;
+  }
+
+  async getInstallation(installationId: string) {
+    const octokit = await this.createInstallationOctokit(installationId);
+    const { data: installation } = await octokit.apps.getInstallation({
+      installation_id: +installationId,
+    });
+    return installation;
   }
 }

@@ -3,26 +3,32 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
-export class User {
+export class GithubInstallation {
   @PrimaryColumn()
   id: string;
 
-  @Column({ unique: true, name: 'github_id' })
-  githubId: string;
+  @Column({ name: 'github_installation_id' })
+  githubInstallationId: string;
 
-  @Column()
-  name: string;
+  @Column({ name: 'org_name' })
+  orgName: string;
 
-  @Column({ nullable: true })
-  email?: string;
+  @Column({ name: 'is_org' })
+  isOrg: boolean;
 
-  @Column({ nullable: true })
-  avatar?: string;
+  @ManyToOne(() => User, {
+    eager: true,
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  user: User;
 
   @CreateDateColumn({
     name: 'created_at',

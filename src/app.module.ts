@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { AuthModule } from './auth';
-import { HealthModule } from './module';
+import { GithubInstallationModule, HealthModule } from './module';
 import { DatabaseModule } from './module/database';
 
 @Module({
@@ -13,6 +13,7 @@ import { DatabaseModule } from './module/database';
     DatabaseModule,
     AuthModule,
     HealthModule,
+    GithubInstallationModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

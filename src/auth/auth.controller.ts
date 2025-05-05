@@ -21,8 +21,10 @@ export class AuthController {
   async handleGithubAppCallback(
     @Res() res: Response,
     @Query('code') code: string,
+    @Query('installation_id') installationId: string,
+    @Query('setup_action') _setupAction?: string,
   ) {
-    return this.authService.handleGithubAppCallback(res, code);
+    return this.authService.handleGithubAppCallback(res, code, installationId);
   }
 
   @Get('/whoami')

@@ -4,18 +4,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { User } from 'src/model';
+import { GithubInstallation, User } from 'src/model';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { GithubModule } from 'src/module';
 import { JwtStrategy } from './strategy';
+import { GithubInstallationService } from 'src/service';
 
 @Global()
 @Module({
   imports: [
     GithubModule,
     PassportModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, GithubInstallation]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
@@ -29,7 +30,7 @@ import { JwtStrategy } from './strategy';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GithubInstallationService],
   controllers: [AuthController],
 })
 export class AuthModule {}
