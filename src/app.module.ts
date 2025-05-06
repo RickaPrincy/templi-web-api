@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { AuthModule } from './auth';
-import { GithubInstallationModule, HealthModule } from './module';
+import {
+  GithubInstallationModule,
+  HealthModule,
+  TemplateModule,
+} from './module';
 import { DatabaseModule } from './module/database';
 
 @Module({
@@ -14,6 +18,7 @@ import { DatabaseModule } from './module/database';
     AuthModule,
     HealthModule,
     GithubInstallationModule,
+    TemplateModule,
   ],
 })
 export class AppModule {}
