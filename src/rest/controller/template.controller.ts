@@ -1,6 +1,5 @@
-import { GithubService } from './../../service/github/github.service';
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
-import { GithubInstallationService, TemplateService } from 'src/service';
+import { TemplateService } from 'src/service';
 import { ApiPagination, ApiRequiredSpec } from '../swagger/decorator';
 import { GenerateTemplate, Template } from '../model';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
@@ -14,8 +13,6 @@ export class TemplateController {
   constructor(
     private readonly templateService: TemplateService,
     private readonly templateMapper: TemplateMapper,
-    private readonly githubService: GithubService,
-    private readonly githubInstallationService: GithubInstallationService,
   ) {}
 
   @Get('/templates')
@@ -58,32 +55,10 @@ export class TemplateController {
     @Param('id') id: string,
     @Body() generateTemplates: GenerateTemplate,
   ) {
-    const template = await this.templateService.findById(id);
-    if (!template) return 'Template not found';
-
-    const githubInstallation = await this.githubInstallationService.findById(
-      generateTemplates.installationId,
+    const repositories = await this.templateService.generate(
+      id,
+      generateTemplates,
     );
-
-    if (!githubInstallation) return 'GitHub installation not found';
-    const octokit = await this.githubService.createInstallationOctokit(
-      githubInstallation.githubInstallationId,
-    );
-
-    if (githubInstallation.isOrg) {
-      const { data: repositories } = await octokit.rest.repos.createInOrg({
-        org: githubInstallation.orgName,
-        name: generateTemplates.repositoryName,
-        private: generateTemplates.isPrivate,
-      });
-      return repositories;
-    }
-
-    const { data: repositories } =
-      await octokit.rest.repos.createForAuthenticatedUser({
-        name: generateTemplates.repositoryName,
-        private: generateTemplates.isPrivate,
-      });
     return repositories;
   }
 }
