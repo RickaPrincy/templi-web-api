@@ -23,6 +23,10 @@ export class TemplateService {
     });
   }
 
+  async findById(id: string) {
+    return await this.repository.findOneBy({ id });
+  }
+
   async save(templates: Template[]) {
     return await this.repository.save(templates);
   }
