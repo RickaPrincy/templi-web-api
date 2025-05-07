@@ -57,7 +57,12 @@ export class TemplateService {
         name: generateTemplates.repositoryName,
         private: generateTemplates.isPrivate,
       });
-      this.createWorkflow(octokit, template, githubInstallation, generateTemplates);
+      this.createWorkflow(
+        octokit,
+        template,
+        githubInstallation,
+        generateTemplates,
+      );
       return repositories;
     }
 
@@ -66,7 +71,12 @@ export class TemplateService {
         name: generateTemplates.repositoryName,
         private: generateTemplates.isPrivate,
       });
-    this.createWorkflow(octokit, template, githubInstallation, generateTemplates);
+    this.createWorkflow(
+      octokit,
+      template,
+      githubInstallation,
+      generateTemplates,
+    );
     return repositories;
   }
 

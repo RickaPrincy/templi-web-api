@@ -16,8 +16,8 @@ jobs:
         run: 
       - name: Generate templi model
         run: templi generate -t ${template.url} -o generated -project-name ${template.repoName} -license ${template.license}
-`
-};
+`;
+}
 
 export function encodedContent(template) {
   return Buffer.from(workflowContent(template)).toString('base64');
