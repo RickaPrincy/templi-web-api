@@ -56,8 +56,9 @@ export class TemplateService {
         org: githubInstallation.orgName,
         name: generateTemplates.repositoryName,
         private: generateTemplates.isPrivate,
+        auto_init: true,
       });
-      this.createWorkflow(
+      await this.createWorkflow(
         octokit,
         template,
         githubInstallation,
@@ -70,8 +71,9 @@ export class TemplateService {
       await octokit.rest.repos.createForAuthenticatedUser({
         name: generateTemplates.repositoryName,
         private: generateTemplates.isPrivate,
+        auto_init: true,
       });
-    this.createWorkflow(
+    await this.createWorkflow(
       octokit,
       template,
       githubInstallation,
@@ -93,15 +95,13 @@ export class TemplateService {
       repo: generateTemplates.repositoryName,
       path: '.github/workflows/templi.yml',
       message: 'Add GitHub Actions workflow',
-      content: encodedContent(template.url, generateTemplates.values.find()),
-      committer: {
-        name: 'TempliBot',
-        email: 'bot@templi.com',
-      },
-      author: {
-        name: 'TempliBot',
-        email: 'bot@templi.com',
-      },
+      content: encodedContent(
+        template.url,
+        generateTemplates.values.find((v) => v.name === 'projectName')?.value ||
+          'ProjectName',
+        generateTemplates.values.find((v) => v.name === 'license')?.value ||
+          'MIT',
+      ),
     });
   }
 }

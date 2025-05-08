@@ -50,7 +50,6 @@ export class TemplateController {
   @ApiBody({
     type: [GenerateTemplate],
   })
-  @Authenticated()
   async generateTemplates(
     @Param('id') id: string,
     @Body() generateTemplates: GenerateTemplate,
@@ -59,6 +58,6 @@ export class TemplateController {
       id,
       generateTemplates,
     );
-    return repositories;
+    return repositories != null;
   }
 }

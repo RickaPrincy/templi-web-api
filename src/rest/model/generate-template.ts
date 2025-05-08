@@ -11,5 +11,10 @@ export class GenerateTemplate {
   installationId: string;
 
   @ApiProperty()
-  values: Map<string, any>[];
+  values: Value[];
+}
+
+export interface Value<T = any> {
+  name: string;
+  value: T;
 }
