@@ -56,7 +56,6 @@ export class TemplateService {
         org: githubInstallation.orgName,
         name: generateTemplates.repositoryName,
         private: generateTemplates.isPrivate,
-        auto_init: true,
       });
       await this.createWorkflow(
         octokit,
@@ -89,9 +88,7 @@ export class TemplateService {
     generateTemplates: GenerateTemplate,
   ) {
     await octokit.rest.repos.createOrUpdateFileContents({
-      owner: githubInstallation.isOrg
-        ? githubInstallation.orgName
-        : (await octokit.rest.users.getAuthenticated()).data.login,
+      owner: githubInstallation.orgName,
       repo: generateTemplates.repositoryName,
       path: '.github/workflows/templi.yml',
       message: 'Add GitHub Actions workflow',

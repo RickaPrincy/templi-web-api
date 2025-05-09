@@ -58,6 +58,6 @@ export class TemplateController {
       id,
       generateTemplates,
     );
-    return repositories != null;
+    return repositories;
   }
 }
