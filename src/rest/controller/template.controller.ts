@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 import { TemplateService } from 'src/service';
 import { ApiPagination, ApiRequiredSpec } from '../swagger/decorator';
-import { Template } from '../model';
+import { GenerateTemplate, Template } from '../model';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Pagination, PaginationParams } from '../decorator';
 import { Authenticated } from 'src/auth/decorator';
@@ -40,5 +40,24 @@ export class TemplateController {
     return Promise.all(
       savedTemplates.map((template) => this.templateMapper.toRest(template)),
     );
+  }
+
+  @Put('/templates/:id/generate')
+  @ApiRequiredSpec({
+    operationId: 'generateTemplate',
+    type: [Template],
+  })
+  @ApiBody({
+    type: [GenerateTemplate],
+  })
+  async generateTemplates(
+    @Param('id') id: string,
+    @Body() generateTemplates: GenerateTemplate,
+  ) {
+    const repositories = await this.templateService.generate(
+      id,
+      generateTemplates,
+    );
+    return repositories;
   }
 }
