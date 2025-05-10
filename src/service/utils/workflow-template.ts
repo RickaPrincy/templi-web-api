@@ -1,36 +1,58 @@
 import { Buffer } from 'buffer';
+import { Template } from 'src/model';
+import { GenerateTemplate } from 'src/rest/model';
 
-function workflowContent(url, repoName, license): string {
+//TODO: refactor
+const toSnakeCase = (value: string) => value.toLowerCase().replace(/_/g, '-');
+const cliValues = (generateTemplate: GenerateTemplate) => {
+  return generateTemplate.values.map(
+    ({ name, value }) => `-${toSnakeCase(name)} "${value}"`,
+  );
+};
+
+const workflowContent = (
+  template: Template,
+  generateTemplate: GenerateTemplate,
+) => {
   return `
-name: Templi Generate
+name: templi
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Install git/base-devel
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git base-devel
 
-      - name: Update packages
-        run: pacman -Syu --noconfirm
+      - name: Install yay 
+        run: |
+          git clone https://aur.archlinux.org/yay.git
+          cd yay
+          makepkg -si --noconfirm
 
-      - name: Install Node.js
-        run: pacman
-        
-      - name: Install templi generate cli
-        run: yay -Sy templi_cli
-
-      - name: Generate templi model
-        run: templi generate -t ${url} -o generated -project-name ${repoName} -license ${license}
+      - name: Install templi_cli with yay 
+        run: yay -Sy --noconfirm --mflags "--noconfirm" templi_cli
+      
+      - name: generate project
+        run: templi generate -t ${template.url} -o generated-project ${cliValues(generateTemplate)}
 `;
-}
+};
 
-export function encodedContent(url, repoName, license) {
-  return Buffer.from(workflowContent(url, repoName, license)).toString(
+//TODO: refactor: create service model
+export const generateWorkFlows = (
+  template: Template,
+  generateTemplate: GenerateTemplate,
+) => {
+  return Buffer.from(workflowContent(template, generateTemplate)).toString(
     'base64',
   );
-}
+};

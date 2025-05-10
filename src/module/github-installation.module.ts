@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GithubInstallation } from 'src/model';
-import { GithubInstallationController } from 'src/rest/controller/github-installation.controller';
+import { GithubInstallationController } from 'src/rest/controller';
 import { GithubInstallationMapper } from 'src/rest/mapper';
 import { GithubInstallationService } from 'src/service';
 

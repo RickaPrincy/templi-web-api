@@ -17,6 +17,7 @@ export class SelfMatcherGuard implements CanActivate {
       'self-matcher',
       context.getHandler(),
     );
+
     if (!paramKey) {
       return true;
     }

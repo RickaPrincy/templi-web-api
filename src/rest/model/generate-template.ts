@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class Value {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  value: any;
+}
+
 export class GenerateTemplate {
   @ApiProperty()
   repositoryName: string;
@@ -10,11 +18,6 @@ export class GenerateTemplate {
   @ApiProperty()
   installationId: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [Value] })
   values: Value[];
-}
-
-export interface Value<T = any> {
-  name: string;
-  value: T;
 }

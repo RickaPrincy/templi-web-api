@@ -8,9 +8,6 @@ export class GithubInstallation {
   orgName: string;
 
   @ApiProperty()
-  githubInstallationId: string;
-
-  @ApiProperty()
   isOrg: boolean;
 
   @ApiProperty({ format: 'date-time' })

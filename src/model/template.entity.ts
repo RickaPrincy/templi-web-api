@@ -21,7 +21,7 @@ export class Template {
   @Column({ name: 'description' })
   description: string;
 
-  @Column({ name: 'config' })
+  @Column({ name: 'jsonb' })
   config: string;
 
   @CreateDateColumn({

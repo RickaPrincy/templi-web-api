@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { GithubInstallation } from 'src/model';
 import { PaginationParams } from 'src/rest/decorator';
 import { Repository } from 'typeorm';

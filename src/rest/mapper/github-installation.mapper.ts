@@ -10,6 +10,7 @@ export class GithubInstallationMapper {
     const {
       deletedAt: _deletedAt,
       user: _user,
+      githubInstallationId: _githubInstallatinId,
       ...restGithubInstallation
     } = githubInstallation;
     return restGithubInstallation;

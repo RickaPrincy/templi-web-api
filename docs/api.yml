@@ -9,6 +9,16 @@ paths:
           in: query
           schema:
             type: string
+        - name: installation_id
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: setup_action
+          required: true
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: ''
@@ -123,6 +133,269 @@ paths:
       summary: ''
       tags:
         - Health
+  /users/{id}/installations:
+    get:
+      operationId: getInstallationsByUserId
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            default: 1
+        - name: pageSize
+          required: false
+          in: query
+          schema:
+            type: number
+            default: 10
+            minimum: 1
+            maximum: 500
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GithubInstallation'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      security:
+        - bearer: []
+      summary: ''
+      tags:
+        - Resources
+  /templates/{id}:
+    get:
+      operationId: getTemplateById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      summary: ''
+      tags:
+        - Resources
+  /templates:
+    get:
+      operationId: getTemplates
+      parameters:
+        - name: name
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            default: 1
+        - name: pageSize
+          required: false
+          in: query
+          schema:
+            type: number
+            default: 10
+            minimum: 1
+            maximum: 500
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Template'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      summary: ''
+      tags:
+        - Resources
+    put:
+      operationId: crupdateTemplates
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Template'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Template'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      security:
+        - bearer: []
+      summary: ''
+      tags:
+        - Resources
+  /templates/{id}/generate:
+    put:
+      operationId: generateTemplate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateTemplate'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateTemplate'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      summary: ''
+      tags:
+        - Resources
 info:
   title: Templi
   description: >-
@@ -188,3 +461,81 @@ components:
       required:
         - id
         - name
+    GithubInstallation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        orgName:
+          type: string
+        isOrg:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgName
+        - isOrg
+        - createdAt
+        - updatedAt
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+        config:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - url
+        - description
+        - config
+        - createdAt
+        - updatedAt
+    Value:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: object
+      required:
+        - name
+        - value
+    GenerateTemplate:
+      type: object
+      properties:
+        repositoryName:
+          type: string
+        isPrivate:
+          type: boolean
+        installationId:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Value'
+      required:
+        - repositoryName
+        - isPrivate
+        - installationId
+        - values
