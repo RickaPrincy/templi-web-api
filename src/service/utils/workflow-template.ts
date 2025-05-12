@@ -5,9 +5,9 @@ import { GenerateTemplate } from 'src/rest/model';
 //TODO: refactor
 const toSnakeCase = (value: string) => value.toLowerCase().replace(/_/g, '-');
 const cliValues = (generateTemplate: GenerateTemplate) => {
-  return generateTemplate.values.map(
-    ({ name, value }) => `-${toSnakeCase(name)} "${value}"`,
-  );
+  return generateTemplate.values
+    .map(({ name, value }) => `-${toSnakeCase(name)} "${value}"`)
+    .join(' ');
 };
 
 const workflowContent = (

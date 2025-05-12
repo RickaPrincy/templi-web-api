@@ -93,7 +93,7 @@ export class TemplateService {
       owner: githubInstallation.orgName,
       repo: generateTemplate.repositoryName,
       content: generateWorkFlows(template, generateTemplate),
-      path: `.github/workflows/templi-generate-${uuid()}`,
+      path: `.github/workflows/templi-generate-${uuid()}.yml`,
       message: 'Add GitHub Actions workflow',
     });
   }

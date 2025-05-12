@@ -18,6 +18,7 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Pagination, PaginationParams } from '../decorator';
 import { Authenticated } from 'src/auth/decorator';
 import { TemplateMapper } from '../mapper';
+import { ILike } from 'typeorm';
 
 @Controller()
 @ApiTags('Resources')
@@ -49,7 +50,7 @@ export class TemplateController {
     @Query('name') name: string,
   ) {
     const templates = await this.templateService.findAll(pagination, {
-      name,
+      name: name ? ILike(`%${name}%`) : undefined,
     });
 
     return Promise.all(

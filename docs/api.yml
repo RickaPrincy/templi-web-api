@@ -495,7 +495,7 @@ components:
           type: string
         description:
           type: string
-        config:
+        configUrl:
           type: string
         createdAt:
           type: string
@@ -508,7 +508,7 @@ components:
         - name
         - url
         - description
-        - config
+        - configUrl
         - createdAt
         - updatedAt
     Value:
@@ -538,4 +538,5 @@ components:
         - repositoryName
         - isPrivate
         - installationId
+        - values
         - values
