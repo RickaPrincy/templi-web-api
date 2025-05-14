@@ -93,7 +93,7 @@ export class TemplateService {
       repo: generateTemplate.repositoryName,
       content: generateWorkflowFile(template, generateTemplate),
       path: `.github/workflows/templi-generate.yml`,
-      message: 'Prepare project generation',
+      message: 'Project Generation',
     });
   }
 }

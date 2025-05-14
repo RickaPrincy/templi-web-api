@@ -21,8 +21,8 @@ export class Template {
   @Column({ name: 'description' })
   description: string;
 
-  @Column({ name: 'string' })
-  configUrl: string;
+  @Column({ nullable: true })
+  scope?: string;
 
   @CreateDateColumn({
     name: 'created_at',
