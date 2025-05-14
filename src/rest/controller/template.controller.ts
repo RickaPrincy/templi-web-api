@@ -13,7 +13,7 @@ import {
   ApiPagination,
   ApiRequiredSpec,
 } from '../swagger/decorator';
-import { GenerateTemplate, Template } from '../model';
+import { GenerateProjectPayload, Template } from '../model';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Pagination, PaginationParams } from '../decorator';
 import { Authenticated } from 'src/auth/decorator';
@@ -75,11 +75,14 @@ export class TemplateController {
   }
 
   @Put('/templates/:id/generate')
-  @ApiRequiredSpec({ operationId: 'generateTemplate', type: GenerateTemplate })
-  @ApiBody({ type: GenerateTemplate })
+  @ApiRequiredSpec({
+    operationId: 'generateProject',
+    type: GenerateProjectPayload,
+  })
+  @ApiBody({ type: GenerateProjectPayload })
   async generateTemplates(
     @Param('id') id: string,
-    @Body() generateTemplate: GenerateTemplate,
+    @Body() generateTemplate: GenerateProjectPayload,
   ) {
     const repositories = await this.templateService.generate(
       id,

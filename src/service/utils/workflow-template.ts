@@ -1,58 +1,81 @@
 import { Buffer } from 'buffer';
 import { Template } from 'src/model';
-import { GenerateTemplate } from 'src/rest/model';
+import { GenerateProjectPayload } from 'src/rest/model';
+import * as dotenv from 'dotenv';
 
-//TODO: refactor
-const toSnakeCase = (value: string) => value.toLowerCase().replace(/_/g, '-');
-const cliValues = (generateTemplate: GenerateTemplate) => {
+dotenv.config();
+
+const formatCliArgs = (generateTemplate: GenerateProjectPayload) => {
   return generateTemplate.values
-    .map(({ name, value }) => `-${toSnakeCase(name)} "${value}"`)
+    .map(({ name, value }) => `-${name} "${value}"`)
     .join(' ');
 };
 
-const workflowContent = (
+const createWorkflowContent = (
   template: Template,
-  generateTemplate: GenerateTemplate,
+  generateTemplate: GenerateProjectPayload,
 ) => {
   return `
-name: templi
+name: templi-generate 
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
+
+permissions:
+  contents: write
 
 jobs:
-  generate:
+  process:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux:latest
 
     steps:
-      - name: Install git/base-devel
-        run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm git base-devel
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install yay 
-        run: |
-          git clone https://aur.archlinux.org/yay.git
-          cd yay
-          makepkg -si --noconfirm
+      - name: Install TColor 
+        run: bash <(curl -s https://raw.githubusercontent.com/RickaPrincy/TColor.hpp/main/install.sh)
 
-      - name: Install templi_cli with yay 
-        run: yay -Sy --noconfirm --mflags "--noconfirm" templi_cli
+      - name: Install rcli 
+        run: bash <(curl -s https://raw.githubusercontent.com/RickaPrincy/rcli/main/install.sh)
       
-      - name: generate project
-        run: templi generate -t ${template.url} -o generated-project ${cliValues(generateTemplate)}
+      - name: Install Templi
+        run: bash <(curl -s https://raw.githubusercontent.com/RickaPrincy/Templi/main/install.sh)
+
+      - name: Delete all files except .git
+        run: |
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+      
+      - name: Generate project 
+        run: |
+          git config user.name "templi-web[bot]"
+          git config user.email "${process.env.GITHUB_APP_ID}+templi-web[bot]@users.noreply.github.com"
+          export LD_LIBRARY_PATH=/usr/local/lib:\\$LD_LIBRARY_PATH
+          templi generate -t ${template.url}.git -o generated ${formatCliArgs(generateTemplate)}
+
+      - name: Move generated files to root
+        run: |
+          shopt -s dotglob
+          mv generated/* .
+          rm -rf generated
+
+      - name: Commit changes
+        run: |
+          git add --all 
+          git commit -m "chore: generate project with templi" || echo "Nothing to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.8.0
+        with:
+          github_token: $\{{ secrets.GITHUB_TOKEN }}
 `;
 };
 
-//TODO: refactor: create service model
-export const generateWorkFlows = (
+export const generateWorkflowFile = (
   template: Template,
-  generateTemplate: GenerateTemplate,
+  payload: GenerateProjectPayload,
 ) => {
-  return Buffer.from(workflowContent(template, generateTemplate)).toString(
+  return Buffer.from(createWorkflowContent(template, payload)).toString(
     'base64',
   );
 };

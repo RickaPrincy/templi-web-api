@@ -10,7 +10,7 @@ export class Value {
   value: any;
 }
 
-export class GenerateTemplate {
+export class GenerateProjectPayload {
   @IsString()
   @ApiProperty()
   repositoryName: string;

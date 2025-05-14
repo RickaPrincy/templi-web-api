@@ -2,17 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Octokit } from '@octokit/rest';
 import { Repository } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 
 import { GithubService } from './github';
 import { Criteria } from './utils/criteria';
 import { GithubInstallationService } from '.';
 import { PaginationParams } from './../rest/decorator';
 import { GithubInstallation, Template } from 'src/model';
-import { GenerateTemplate } from './../rest/model';
+import { GenerateProjectPayload } from './../rest/model';
 
 import { findByCriteria } from './utils/find-by-criteria';
-import { generateWorkFlows } from 'src/service/utils/workflow-template';
+import { generateWorkflowFile } from 'src/service/utils/workflow-template';
 import { UPDATED_AT_CREATED_AT_ORDER_BY } from './utils/default-order-by';
 
 @Injectable()
@@ -41,14 +40,14 @@ export class TemplateService {
     return await this.repository.save(templates);
   }
 
-  async generate(id: string, generateTemplates: GenerateTemplate) {
+  async generate(id: string, generatePayload: GenerateProjectPayload) {
     const template = await this.findById(id);
     if (!template) {
       throw new NotFoundException('Template not found');
     }
 
     const githubInstallation = await this.githubInstallationService.findById(
-      generateTemplates.installationId,
+      generatePayload.installationId,
     );
     if (!githubInstallation) {
       throw new NotFoundException('githubInstallation');
@@ -58,43 +57,43 @@ export class TemplateService {
       githubInstallation.githubInstallationId,
     );
 
-    //TODO: refactor
     if (githubInstallation.isOrg) {
       await octokit.repos.createInOrg({
         org: githubInstallation.orgName,
-        name: generateTemplates.repositoryName,
-        private: generateTemplates.isPrivate,
+        name: generatePayload.repositoryName,
+        private: generatePayload.isPrivate,
       });
     } else {
+      //FIXME: access
       await octokit.repos.createForAuthenticatedUser({
-        name: generateTemplates.repositoryName,
-        private: generateTemplates.isPrivate,
+        name: generatePayload.repositoryName,
+        private: generatePayload.isPrivate,
         auto_init: true,
       });
     }
 
-    await this.createWorkflow(
+    await this.createWorkflowToGenerateProject(
       octokit,
       template,
       githubInstallation,
-      generateTemplates,
+      generatePayload,
     );
 
-    return generateTemplates;
+    return generatePayload;
   }
 
-  private async createWorkflow(
+  private async createWorkflowToGenerateProject(
     octokit: Octokit,
     template: Template,
     githubInstallation: GithubInstallation,
-    generateTemplate: GenerateTemplate,
+    generateTemplate: GenerateProjectPayload,
   ) {
     await octokit.rest.repos.createOrUpdateFileContents({
       owner: githubInstallation.orgName,
       repo: generateTemplate.repositoryName,
-      content: generateWorkFlows(template, generateTemplate),
-      path: `.github/workflows/templi-generate-${uuid()}.yml`,
-      message: 'Add GitHub Actions workflow',
+      content: generateWorkflowFile(template, generateTemplate),
+      path: `.github/workflows/templi-generate.yml`,
+      message: 'Prepare project generation',
     });
   }
 }

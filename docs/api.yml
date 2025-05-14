@@ -349,7 +349,7 @@ paths:
         - Resources
   /templates/{id}/generate:
     put:
-      operationId: generateTemplate
+      operationId: generateProject
       parameters:
         - name: id
           required: true
@@ -361,14 +361,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GenerateTemplate'
+              $ref: '#/components/schemas/GenerateProjectPayload'
       responses:
         '200':
           description: ''
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenerateTemplate'
+                $ref: '#/components/schemas/GenerateProjectPayload'
         '400':
           description: ''
           content:
@@ -491,11 +491,11 @@ components:
           format: uuid
         name:
           type: string
+        scope:
+          type: string
         url:
           type: string
         description:
-          type: string
-        configUrl:
           type: string
         createdAt:
           type: string
@@ -506,9 +506,9 @@ components:
       required:
         - id
         - name
+        - scope
         - url
         - description
-        - configUrl
         - createdAt
         - updatedAt
     Value:
@@ -521,7 +521,7 @@ components:
       required:
         - name
         - value
-    GenerateTemplate:
+    GenerateProjectPayload:
       type: object
       properties:
         repositoryName:
@@ -538,5 +538,4 @@ components:
         - repositoryName
         - isPrivate
         - installationId
-        - values
         - values
