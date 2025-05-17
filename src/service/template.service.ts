@@ -8,7 +8,7 @@ import { Criteria } from './utils/criteria';
 import { GithubInstallationService } from '.';
 import { PaginationParams } from './../rest/decorator';
 import { GithubInstallation, Template } from 'src/model';
-import { GenerateProjectPayload } from './../rest/model';
+import { GenerateProject } from './model';
 
 import { findByCriteria } from './utils/find-by-criteria';
 import { generateWorkflowFile } from 'src/service/utils/workflow-template';
@@ -40,12 +40,7 @@ export class TemplateService {
     return await this.repository.save(templates);
   }
 
-  async generate(id: string, generatePayload: GenerateProjectPayload) {
-    const template = await this.findById(id);
-    if (!template) {
-      throw new NotFoundException('Template not found');
-    }
-
+  async generate(generatePayload: GenerateProject) {
     const githubInstallation = await this.githubInstallationService.findById(
       generatePayload.installationId,
     );
@@ -61,20 +56,19 @@ export class TemplateService {
       await octokit.repos.createInOrg({
         org: githubInstallation.orgName,
         name: generatePayload.repositoryName,
-        private: generatePayload.isPrivate,
+        private: generatePayload.isPrivateRepository,
       });
     } else {
       //FIXME: access
       await octokit.repos.createForAuthenticatedUser({
         name: generatePayload.repositoryName,
-        private: generatePayload.isPrivate,
+        private: generatePayload.isPrivateRepository,
         auto_init: true,
       });
     }
 
     await this.createWorkflowToGenerateProject(
       octokit,
-      template,
       githubInstallation,
       generatePayload,
     );
@@ -84,14 +78,13 @@ export class TemplateService {
 
   private async createWorkflowToGenerateProject(
     octokit: Octokit,
-    template: Template,
     githubInstallation: GithubInstallation,
-    generateTemplate: GenerateProjectPayload,
+    generateProject: GenerateProject,
   ) {
     await octokit.rest.repos.createOrUpdateFileContents({
       owner: githubInstallation.orgName,
-      repo: generateTemplate.repositoryName,
-      content: generateWorkflowFile(template, generateTemplate),
+      repo: generateProject.repositoryName,
+      content: generateWorkflowFile(generateProject),
       path: `.github/workflows/templi-generate.yml`,
       message: 'Project Generation',
     });

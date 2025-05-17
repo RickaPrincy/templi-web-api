@@ -1,24 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { GenerateProjectPayloadValue } from './generate-project-payload';
 
-export class GenerateProjectPayloadValue {
-  @ApiProperty()
-  @IsString()
-  name: string;
-
-  @ApiProperty()
-  value: any;
-}
-
-export class GenerateProjectPayload {
-  @IsString()
-  @ApiProperty()
-  templateUrl: string;
-
-  @IsString()
-  @ApiProperty()
-  scope: string;
-
+export class GenerateWithPersistedTemplate {
   @IsString()
   @ApiProperty()
   repositoryName: string;

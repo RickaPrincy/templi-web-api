@@ -1,20 +1,16 @@
 import { Buffer } from 'buffer';
-import { Template } from 'src/model';
-import { GenerateProjectPayload } from 'src/rest/model';
+import { GenerateProject } from '../model';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const formatCliArgs = (generateTemplate: GenerateProjectPayload) => {
+const formatCliArgs = (generateTemplate: GenerateProject) => {
   return generateTemplate.values
     .map(({ name, value }) => `-${name} "${value}"`)
     .join(' ');
 };
 
-const createWorkflowContent = (
-  template: Template,
-  generateTemplate: GenerateProjectPayload,
-) => {
+const createWorkflowContent = (generateTemplate: GenerateProject) => {
   return `
 name: templi-generate 
 
@@ -33,14 +29,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install TColor 
-        run: bash <(curl -s https://raw.githubusercontent.com/RickaPrincy/TColor.hpp/main/install.sh)
-
-      - name: Install rcli 
-        run: bash <(curl -s https://raw.githubusercontent.com/RickaPrincy/rcli/main/install.sh)
-      
       - name: Install Templi
-        run: bash <(curl -s https://raw.githubusercontent.com/RickaPrincy/Templi/main/install.sh)
+        run: |
+          curl -L -o https://github.com/RickaPrincy/Templi/releases/download/v4.1.1/templi-cli-linux-x86_64@4.1.1.tar.gz
+          mkdir -p /tmp/templi
+          tar -xzf templi-cli-linux-x86_64@4.1.1.tar.gz -C /tmp/templi
+          echo "/tmp/templi/templi/bin" >> $GITHUB_PATH
 
       - name: Delete all files except .git
         run: |
@@ -49,9 +43,8 @@ jobs:
       - name: Generate project 
         run: |
           git config user.name "templi-web[bot]"
-          git config user.email "${process.env.GITHUB_APP_ID}+templi-web[bot]@users.noreply.github.com"
-          export LD_LIBRARY_PATH=/usr/local/lib:\\$LD_LIBRARY_PATH
-          templi generate -t ${template.url}.git -o generated ${formatCliArgs(generateTemplate)}
+          git config user.email "${process.env.GITHUB_EMAIL_ID}+templi-web[bot]@users.noreply.github.com"
+          templi generate -t ${generateTemplate.templateUrl}.git ${generateTemplate.scope ? `-s ${generateTemplate.scope}` : ''} -o generated ${formatCliArgs(generateTemplate)}
 
       - name: Move generated files to root
         run: |
@@ -71,11 +64,6 @@ jobs:
 `;
 };
 
-export const generateWorkflowFile = (
-  template: Template,
-  payload: GenerateProjectPayload,
-) => {
-  return Buffer.from(createWorkflowContent(template, payload)).toString(
-    'base64',
-  );
+export const generateWorkflowFile = (payload: GenerateProject) => {
+  return Buffer.from(createWorkflowContent(payload)).toString('base64');
 };

@@ -10,6 +10,7 @@ import { AuthController } from './auth.controller';
 import { GithubModule } from 'src/module';
 import { JwtStrategy } from './strategy';
 import { GithubInstallationService } from 'src/service';
+import { ApiKeyGuard } from './guard';
 
 @Global()
 @Module({
@@ -30,7 +31,7 @@ import { GithubInstallationService } from 'src/service';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, GithubInstallationService],
+  providers: [AuthService, ApiKeyGuard, JwtStrategy, GithubInstallationService],
   controllers: [AuthController],
 })
 export class AuthModule {}

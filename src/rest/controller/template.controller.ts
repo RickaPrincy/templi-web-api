@@ -7,18 +7,22 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { ILike } from 'typeorm';
 import { TemplateService } from 'src/service';
 import {
   ApiCriteria,
   ApiPagination,
   ApiRequiredSpec,
 } from '../swagger/decorator';
-import { GenerateProjectPayload, Template } from '../model';
+import {
+  GenerateProjectPayload,
+  GenerateWithPersistedTemplate,
+  Template,
+} from '../model';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Pagination, PaginationParams } from '../decorator';
-import { Authenticated } from 'src/auth/decorator';
-import { TemplateMapper } from '../mapper';
-import { ILike } from 'typeorm';
+import { Authenticated, AuthenticatedWithApiKey } from 'src/auth/decorator';
+import { GenerateProjectMapper, TemplateMapper } from '../mapper';
 
 @Controller()
 @ApiTags('Resources')
@@ -26,6 +30,7 @@ export class TemplateController {
   constructor(
     private readonly templateService: TemplateService,
     private readonly templateMapper: TemplateMapper,
+    private readonly generateMapper: GenerateProjectMapper,
   ) {}
 
   @Get('/templates/:id')
@@ -61,7 +66,7 @@ export class TemplateController {
   @Put('/templates')
   @ApiRequiredSpec({ operationId: 'crupdateTemplates', type: [Template] })
   @ApiBody({ type: [Template] })
-  @Authenticated()
+  @AuthenticatedWithApiKey()
   async saveTemplates(@Body() templates: Template[]) {
     const domainTemplates = await Promise.all(
       templates.map((template) => this.templateMapper.toDomain(template)),
@@ -75,19 +80,34 @@ export class TemplateController {
   }
 
   @Put('/templates/:id/generate')
+  @Authenticated()
+  @ApiRequiredSpec({
+    operationId: 'generateProjectWithTemplate',
+    type: GenerateWithPersistedTemplate,
+  })
+  @ApiBody({ type: GenerateWithPersistedTemplate })
+  async generateTemplatesWithTemplate(
+    @Param('id') id: string,
+    @Body() generateProject: GenerateWithPersistedTemplate,
+  ) {
+    const domainPayload = await this.generateMapper.withTemplatetoDomain(
+      id,
+      generateProject,
+    );
+    const repositories = await this.templateService.generate(domainPayload);
+    return repositories;
+  }
+
+  @Put('/generate')
+  @Authenticated()
   @ApiRequiredSpec({
     operationId: 'generateProject',
     type: GenerateProjectPayload,
   })
   @ApiBody({ type: GenerateProjectPayload })
-  async generateTemplates(
-    @Param('id') id: string,
-    @Body() generateTemplate: GenerateProjectPayload,
-  ) {
-    const repositories = await this.templateService.generate(
-      id,
-      generateTemplate,
-    );
+  async generateTemplates(@Body() generateProject: GenerateProjectPayload) {
+    const domainPayload = await this.generateMapper.toDomain(generateProject);
+    const repositories = await this.templateService.generate(domainPayload);
     return repositories;
   }
 }

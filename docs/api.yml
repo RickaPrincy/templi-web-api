@@ -300,7 +300,11 @@ paths:
         - Resources
     put:
       operationId: crupdateTemplates
-      parameters: []
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -342,20 +346,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseError'
-      security:
-        - bearer: []
       summary: ''
       tags:
         - Resources
   /templates/{id}/generate:
     put:
-      operationId: generateProject
+      operationId: generateProjectWithTemplate
       parameters:
         - name: id
           required: true
           in: path
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateWithPersistedTemplate'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateWithPersistedTemplate'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '403':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      security:
+        - bearer: []
+      summary: ''
+      tags:
+        - Resources
+  /generate:
+    put:
+      operationId: generateProject
+      parameters: []
       requestBody:
         required: true
         content:
@@ -393,6 +441,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponseError'
+      security:
+        - bearer: []
       summary: ''
       tags:
         - Resources
@@ -511,7 +561,7 @@ components:
         - description
         - createdAt
         - updatedAt
-    Value:
+    GenerateProjectPayloadValue:
       type: object
       properties:
         name:
@@ -521,7 +571,7 @@ components:
       required:
         - name
         - value
-    GenerateProjectPayload:
+    GenerateWithPersistedTemplate:
       type: object
       properties:
         repositoryName:
@@ -533,8 +583,32 @@ components:
         values:
           type: array
           items:
-            $ref: '#/components/schemas/Value'
+            $ref: '#/components/schemas/GenerateProjectPayloadValue'
       required:
+        - repositoryName
+        - isPrivate
+        - installationId
+        - values
+    GenerateProjectPayload:
+      type: object
+      properties:
+        templateUrl:
+          type: string
+        scope:
+          type: string
+        repositoryName:
+          type: string
+        isPrivate:
+          type: boolean
+        installationId:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenerateProjectPayloadValue'
+      required:
+        - templateUrl
+        - scope
         - repositoryName
         - isPrivate
         - installationId
