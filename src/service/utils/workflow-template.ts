@@ -52,6 +52,12 @@ jobs:
           mv generated/* .
           rm -rf generated
 
+      - name: Rename .github folder since it's not allowed
+        run: |
+          if [ -d ".github" ]; then
+            mv .github __github__
+          fi
+
       - name: Commit changes
         run: |
           git add --all 
