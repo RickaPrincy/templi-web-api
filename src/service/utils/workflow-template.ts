@@ -29,16 +29,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Templi
-        run: |
-          curl -L -o https://github.com/RickaPrincy/Templi/releases/download/v4.1.1/templi-cli-linux-x86_64@4.1.1.tar.gz
-          mkdir -p /tmp/templi
-          tar -xzf templi-cli-linux-x86_64@4.1.1.tar.gz -C /tmp/templi
-          echo "/tmp/templi/templi/bin" >> $GITHUB_PATH
-
       - name: Delete all files except .git
         run: |
           find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+
+      - name: Install Templi
+        run: |
+          curl -L -o templi-cli-linux-x86_64@4.1.1.tar.gz https://github.com/RickaPrincy/Templi/releases/download/v4.1.1/templi-cli-linux-x86_64@4.1.1.tar.gz
+          mkdir -p /tmp
+          tar -xzf templi-cli-linux-x86_64@4.1.1.tar.gz -C /tmp
+          echo "/tmp/templi-cli-linux-x86_64@4.1.1/bin" >> $GITHUB_PATH
       
       - name: Generate project 
         run: |
