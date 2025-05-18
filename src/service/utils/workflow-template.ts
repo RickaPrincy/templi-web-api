@@ -35,10 +35,10 @@ jobs:
 
       - name: Install Templi
         run: |
-          curl -L -o templi-cli-linux-x86_64@4.1.1.tar.gz https://github.com/RickaPrincy/Templi/releases/download/v4.1.1/templi-cli-linux-x86_64@4.1.1.tar.gz
-          mkdir -p /tmp
-          tar -xzf templi-cli-linux-x86_64@4.1.1.tar.gz -C /tmp
-          echo "/tmp/templi-cli-linux-x86_64@4.1.1/bin" >> $GITHUB_PATH
+          mkdir -p /tmp/templi
+          curl -L -o /tmp/templi/templi-cli-linux-x86_64@4.1.1.tar.gz https://github.com/RickaPrincy/Templi/releases/download/v4.1.1/templi-cli-linux-x86_64@4.1.1.tar.gz
+          tar -xzf /tmp/templi/templi-cli-linux-x86_64@4.1.1.tar.gz -C /tmp/templi
+          echo "/tmp/templi/templi-cli-linux-x86_64@4.1.1/bin" >> $GITHUB_PATH
       
       - name: Generate project 
         run: |
