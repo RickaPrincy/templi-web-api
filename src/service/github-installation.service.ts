@@ -15,7 +15,15 @@ export class GithubInstallationService {
     private readonly repository: Repository<GithubInstallation>,
   ) {}
 
-  async save(githubInstallation: GithubInstallation) {
+  async update(githubInstallation: GithubInstallation) {
+    await this.repository.delete({
+      githubInstallationId: githubInstallation.githubInstallationId,
+      isOrg: githubInstallation.isOrg,
+      orgName: githubInstallation.orgName,
+      user: {
+        id: githubInstallation.user.id,
+      },
+    });
     return this.repository.save(githubInstallation);
   }
 

@@ -35,14 +35,12 @@ export class GithubService {
     });
   }
 
-  async getUserInfo(code: string) {
+  async getOAuthToken(code: string) {
     const authentication = await this.appAuth(
       { type: 'oauth-user', code } as any /* ARGHHHHHHH */,
     );
-    const octokit = await this.createOAuthUserOctokit(authentication.token);
 
-    const { data: user } = await octokit.users.getAuthenticated();
-    return user;
+    return authentication.token;
   }
 
   async getInstallation(installationId: string) {

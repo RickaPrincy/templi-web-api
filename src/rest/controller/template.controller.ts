@@ -21,8 +21,13 @@ import {
 } from '../model';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Pagination, PaginationParams } from '../decorator';
-import { Authenticated, AuthenticatedWithApiKey } from 'src/auth/decorator';
+import {
+  Authenticated,
+  AuthenticatedUser,
+  AuthenticatedWithApiKey,
+} from 'src/auth/decorator';
 import { GenerateProjectMapper, TemplateMapper } from '../mapper';
+import { User } from 'src/model';
 
 @Controller()
 @ApiTags('Resources')
@@ -89,12 +94,16 @@ export class TemplateController {
   async generateTemplatesWithTemplate(
     @Param('id') id: string,
     @Body() generateProject: GenerateWithPersistedTemplate,
+    @AuthenticatedUser() user: User,
   ) {
     const domainPayload = await this.generateMapper.withTemplatetoDomain(
       id,
       generateProject,
     );
-    const repositories = await this.templateService.generate(domainPayload);
+    const repositories = await this.templateService.generate(
+      user,
+      domainPayload,
+    );
     return repositories;
   }
 
@@ -105,9 +114,15 @@ export class TemplateController {
     type: GenerateProjectPayload,
   })
   @ApiBody({ type: GenerateProjectPayload })
-  async generateTemplates(@Body() generateProject: GenerateProjectPayload) {
+  async generateTemplates(
+    @AuthenticatedUser() user: User,
+    @Body() generateProject: GenerateProjectPayload,
+  ) {
     const domainPayload = await this.generateMapper.toDomain(generateProject);
-    const repositories = await this.templateService.generate(domainPayload);
+    const repositories = await this.templateService.generate(
+      user,
+      domainPayload,
+    );
     return repositories;
   }
 }

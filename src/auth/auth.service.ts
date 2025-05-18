@@ -1,15 +1,19 @@
 import { v4 as uuid } from 'uuid';
 import { Repository } from 'typeorm';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 
 import { Whoami } from './model';
-import { User } from 'src/model';
+import { GithubInstallation, User } from 'src/model';
 import { GithubService } from 'src/service/github';
-import { GithubInstallationService } from 'src/service';
+import { GithubInstallationService, GithubTokenService } from 'src/service';
 
 @Injectable()
 export class AuthService {
@@ -17,10 +21,11 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
     private readonly githubService: GithubService,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
     private readonly githubInstallationService: GithubInstallationService,
+    private readonly githubTokenService: GithubTokenService,
   ) {}
 
   async handleGithubAppCallback(
@@ -29,27 +34,19 @@ export class AuthService {
     installationId: string,
   ) {
     try {
-      const githubUser = await this.githubService.getUserInfo(code);
-      const user = await this.handleUserSignup({
-        id: uuid(),
-        githubId: githubUser.id.toString(),
-        name: githubUser.name ?? uuid(),
-        email: githubUser.email!,
-        avatar: githubUser.avatar_url,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+      const user = await this.initAuth(code);
 
       if (installationId) {
         await this.handleGithubInstallation(user, installationId);
       }
 
-      const token = this.jwtService.sign({
-        id: githubUser.id.toString(),
-        name: githubUser.name ?? '',
-      });
-      return res.redirect(await this.getRedirectURL(token));
-    } catch (_e) {
+      const jwtToken = this.jwtService.sign({ id: user.id, name: user.name });
+      return res.redirect(await this.getRedirectURL(jwtToken));
+    } catch (e) {
+      if (e instanceof InternalServerErrorException) {
+        throw e;
+      }
+
       throw new ForbiddenException('Bad Credentials');
     }
   }
@@ -62,29 +59,27 @@ export class AuthService {
   }
 
   async handleGithubInstallation(user: User, installationId: string) {
-    try {
-      const account = (await this.githubService.getInstallation(installationId))
-        ?.account as any;
-      const isOrg = account?.type === 'Organization';
-      const orgName = account?.login;
+    const account = (await this.githubService.getInstallation(installationId))
+      ?.account as any;
+    const isOrg = account?.type === 'Organization';
+    const orgName = account?.login;
 
-      this.githubInstallationService.save({
-        id: uuid(),
-        isOrg,
-        user,
-        orgName,
-        githubInstallationId: installationId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    } catch (_e) {
-      throw new ForbiddenException('Bad Credentials');
-    }
+    const installation: GithubInstallation = {
+      id: uuid(),
+      isOrg,
+      user,
+      orgName,
+      githubInstallationId: installationId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    return await this.githubInstallationService.update(installation);
   }
 
-  private async getRedirectURL(token: string) {
+  private async getRedirectURL(jwtToken: string) {
     const uiURL = this.configService.get('UI_URL');
-    return `${uiURL}/${AuthService._UI_CALLBACK_PREFIX}?token=${token}`;
+    return `${uiURL}/${AuthService._UI_CALLBACK_PREFIX}?token=${jwtToken}`;
   }
 
   private async handleUserSignup(user: User) {
@@ -95,5 +90,24 @@ export class AuthService {
       return await this.userRepository.save(user);
     }
     return persistedUser;
+  }
+
+  private async initAuth(code: string) {
+    const token = await this.githubService.getOAuthToken(code);
+    const octokit = await this.githubService.createOAuthUserOctokit(token);
+    const { data: githubUser } = await octokit.users.getAuthenticated();
+
+    const user = await this.handleUserSignup({
+      id: uuid(),
+      githubId: githubUser.id.toString(),
+      name: githubUser.name ?? uuid(),
+      email: githubUser.email!,
+      avatar: githubUser.avatar_url,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    await this.githubTokenService.syncUserToken(token, user);
+    return user;
   }
 }

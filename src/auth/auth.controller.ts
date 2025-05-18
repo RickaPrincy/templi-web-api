@@ -10,7 +10,7 @@ import {
 } from './decorator';
 import { User } from 'src/model';
 import { ApiRequiredSpec } from 'src/rest/swagger/decorator';
-import { Whoami } from './model';
+import { GithubSetupAction, Whoami } from './model';
 
 @Controller()
 @ApiTags('Security')
@@ -22,7 +22,7 @@ export class AuthController {
     @Res() res: Response,
     @Query('code') code: string,
     @Query('installation_id') installationId: string,
-    @Query('setup_action') _setupAction?: string,
+    @Query('setup_action') _setupAction?: GithubSetupAction,
   ) {
     return this.authService.handleGithubAppCallback(res, code, installationId);
   }

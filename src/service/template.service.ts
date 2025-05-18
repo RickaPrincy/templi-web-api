@@ -3,12 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Octokit } from '@octokit/rest';
 import { Repository } from 'typeorm';
 
-import { GithubService } from './github';
 import { Criteria } from './utils/criteria';
-import { GithubInstallationService } from '.';
-import { PaginationParams } from './../rest/decorator';
-import { GithubInstallation, Template } from 'src/model';
+import { GithubService } from './github';
 import { GenerateProject } from './model';
+import { PaginationParams } from './../rest/decorator';
+import { GithubInstallation, Template, User } from 'src/model';
+import { GithubTokenService } from './github-token.service';
+import { GithubInstallationService } from './github-installation.service';
 
 import { findByCriteria } from './utils/find-by-criteria';
 import { generateWorkflowFile } from 'src/service/utils/workflow-template';
@@ -20,6 +21,7 @@ export class TemplateService {
     @InjectRepository(Template)
     private readonly repository: Repository<Template>,
     private readonly githubService: GithubService,
+    private readonly githubTokenService: GithubTokenService,
     private readonly githubInstallationService: GithubInstallationService,
   ) {}
 
@@ -40,7 +42,7 @@ export class TemplateService {
     return await this.repository.save(templates);
   }
 
-  async generate(generatePayload: GenerateProject) {
+  async generate(user: User, generatePayload: GenerateProject) {
     const githubInstallation = await this.githubInstallationService.findById(
       generatePayload.installationId,
     );
@@ -48,9 +50,7 @@ export class TemplateService {
       throw new NotFoundException('githubInstallation');
     }
 
-    const octokit = await this.githubService.createInstallationOctokit(
-      githubInstallation.githubInstallationId,
-    );
+    const octokit = await this.createOctokit(user, githubInstallation);
 
     if (githubInstallation.isOrg) {
       await octokit.repos.createInOrg({
@@ -59,11 +59,9 @@ export class TemplateService {
         private: generatePayload.isPrivateRepository,
       });
     } else {
-      //FIXME: access
       await octokit.repos.createForAuthenticatedUser({
         name: generatePayload.repositoryName,
         private: generatePayload.isPrivateRepository,
-        auto_init: true,
       });
     }
 
@@ -74,6 +72,20 @@ export class TemplateService {
     );
 
     return generatePayload;
+  }
+
+  private async createOctokit(
+    user: User,
+    githubInstallation: GithubInstallation,
+  ) {
+    if (githubInstallation.isOrg) {
+      return await this.githubService.createInstallationOctokit(
+        githubInstallation.githubInstallationId,
+      );
+    }
+
+    const token = await this.githubTokenService.findByUserId(user.id);
+    return this.githubService.createOAuthUserOctokit(token.value);
   }
 
   private async createWorkflowToGenerateProject(
