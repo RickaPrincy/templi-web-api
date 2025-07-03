@@ -1,13 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  Dummy,
-  GithubToken,
-  GithubInstallation,
-  Template,
-  User,
-} from 'src/model';
+import { Dummy, GithubInstallation, Template, User } from 'src/model';
 
 @Module({
   imports: [
@@ -16,7 +10,7 @@ import {
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
-        entities: [Dummy, User, GithubInstallation, GithubToken, Template],
+        entities: [Dummy, User, GithubInstallation, Template],
         //WARNING: remove synchronize on prod
         synchronize: true,
       }),

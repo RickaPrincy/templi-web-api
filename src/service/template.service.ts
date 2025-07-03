@@ -7,13 +7,13 @@ import { Criteria } from './utils/criteria';
 import { GithubService } from './github';
 import { GenerateProject } from './model';
 import { PaginationParams } from './../rest/decorator';
-import { GithubInstallation, Template, User } from 'src/model';
-import { GithubTokenService } from './github-token.service';
+import { GithubInstallation, Template } from 'src/model';
 import { GithubInstallationService } from './github-installation.service';
 
 import { findByCriteria } from './utils/find-by-criteria';
 import { generateWorkflowFile } from 'src/service/utils/workflow-template';
 import { UPDATED_AT_CREATED_AT_ORDER_BY } from './utils/default-order-by';
+import { cryptoUtil } from './utils/crypto';
 
 @Injectable()
 export class TemplateService {
@@ -21,7 +21,6 @@ export class TemplateService {
     @InjectRepository(Template)
     private readonly repository: Repository<Template>,
     private readonly githubService: GithubService,
-    private readonly githubTokenService: GithubTokenService,
     private readonly githubInstallationService: GithubInstallationService,
   ) {}
 
@@ -42,7 +41,10 @@ export class TemplateService {
     return await this.repository.save(templates);
   }
 
-  async generate(user: User, generatePayload: GenerateProject) {
+  async generate(
+    encryptedGithubToken: string,
+    generatePayload: GenerateProject,
+  ) {
     const githubInstallation = await this.githubInstallationService.findById(
       generatePayload.installationId,
     );
@@ -50,7 +52,10 @@ export class TemplateService {
       throw new NotFoundException('githubInstallation');
     }
 
-    const octokit = await this.createOctokit(user, githubInstallation);
+    const octokit = await this.createOctokit(
+      encryptedGithubToken,
+      githubInstallation,
+    );
 
     if (githubInstallation.isOrg) {
       await octokit.repos.createInOrg({
@@ -75,7 +80,7 @@ export class TemplateService {
   }
 
   private async createOctokit(
-    user: User,
+    encryptedGithubToken: string,
     githubInstallation: GithubInstallation,
   ) {
     if (githubInstallation.isOrg) {
@@ -84,8 +89,8 @@ export class TemplateService {
       );
     }
 
-    const token = await this.githubTokenService.findByUserId(user.id);
-    return this.githubService.createOAuthUserOctokit(token.value);
+    const token = cryptoUtil.decrypt(encryptedGithubToken);
+    return this.githubService.createOAuthUserOctokit(token);
   }
 
   private async createWorkflowToGenerateProject(

@@ -6,13 +6,11 @@ import { GenerateProjectMapper, TemplateMapper } from 'src/rest/mapper';
 import { TemplateService } from 'src/service';
 import { GithubModule } from './github.module';
 import { GithubInstallationModule } from './github-installation.module';
-import { GithubTokenModule } from './github-token.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Template]),
     GithubModule,
-    GithubTokenModule,
     GithubInstallationModule,
   ],
   controllers: [TemplateController],

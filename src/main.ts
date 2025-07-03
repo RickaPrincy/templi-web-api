@@ -7,6 +7,8 @@ import { AppModule } from './app.module';
 
 config();
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 function setupSwagger<T>(app: INestApplication<T>) {
   const openapiConfig = new DocumentBuilder()
     .setTitle('Templi')
@@ -17,6 +19,7 @@ function setupSwagger<T>(app: INestApplication<T>) {
     .addServer('https://templi.vercel.app')
     .addTag('Health')
     .addTag('Security')
+    .addTag('Resources')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, openapiConfig);
@@ -35,8 +38,12 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
-
+  app.enableCors({
+    origin: isDev
+      ? ['https://templi.vercel.app', 'http://localhost:5173']
+      : ['https://templi.vercel.app'],
+    credentials: true,
+  });
   await app.listen(+(process.env.PORT || 3000));
 }
 

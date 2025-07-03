@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth';
 import {
   GithubInstallationModule,
-  GithubTokenModule,
   HealthModule,
   GithubModule,
   TemplateModule,
@@ -20,7 +19,6 @@ import { DatabaseModule } from './module/database';
     AuthModule,
     HealthModule,
     GithubModule,
-    GithubTokenModule,
     GithubInstallationModule,
     TemplateModule,
   ],

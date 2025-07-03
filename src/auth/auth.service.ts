@@ -13,7 +13,8 @@ import { Response } from 'express';
 import { Whoami } from './model';
 import { GithubInstallation, User } from 'src/model';
 import { GithubService } from 'src/service/github';
-import { GithubInstallationService, GithubTokenService } from 'src/service';
+import { GithubInstallationService } from 'src/service';
+import { cryptoUtil } from 'src/service/utils/crypto';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,6 @@ export class AuthService {
     private readonly githubService: GithubService,
     private readonly configService: ConfigService,
     private readonly githubInstallationService: GithubInstallationService,
-    private readonly githubTokenService: GithubTokenService,
   ) {}
 
   async handleGithubAppCallback(
@@ -34,13 +34,21 @@ export class AuthService {
     installationId: string,
   ) {
     try {
-      const user = await this.initAuth(code);
+      const { user, token } = await this.initAuth(code);
 
       if (installationId) {
         await this.handleGithubInstallation(user, installationId);
       }
 
-      const jwtToken = this.jwtService.sign({ id: user.id, name: user.name });
+      // Just to make sure the token will never be leaked
+      // or used somewhere else than inside Templi
+      const encryptedToken = cryptoUtil.encrypt(token);
+      const jwtToken = this.jwtService.sign({
+        id: user.id,
+        name: user.name,
+        encryptedGithubToken: encryptedToken,
+      });
+
       return res.redirect(await this.getRedirectURL(jwtToken));
     } catch (e) {
       if (e instanceof InternalServerErrorException) {
@@ -107,7 +115,6 @@ export class AuthService {
       updatedAt: new Date().toISOString(),
     });
 
-    await this.githubTokenService.syncUserToken(token, user);
-    return user;
+    return { user, token };
   }
 }

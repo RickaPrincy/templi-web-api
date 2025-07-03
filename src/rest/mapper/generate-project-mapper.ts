@@ -10,7 +10,7 @@ import { TemplateService } from 'src/service';
 export class GenerateProjectMapper {
   constructor(private readonly templateService: TemplateService) {}
 
-  async withTemplatetoDomain(
+  async withTemplateToDomain(
     templateId: string,
     rest: GenerateWithPersistedTemplate,
   ): Promise<GenerateProject> {

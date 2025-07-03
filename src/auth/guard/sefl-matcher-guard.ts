@@ -1,5 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { User } from 'src/model';
+import { JwtPayload } from '../model';
 
 @Injectable()
 export class SelfMatcherGuard implements CanActivate {
@@ -7,7 +9,7 @@ export class SelfMatcherGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const { user } = request.user as { user: User; payload: JwtPayload };
 
     if (!user) {
       return false;
