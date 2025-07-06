@@ -370,7 +370,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenerateWithPersistedTemplate'
+                $ref: '#/components/schemas/GenerateProjectResponse'
         '400':
           description: ''
           content:
@@ -416,7 +416,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenerateProjectPayload'
+                $ref: '#/components/schemas/GenerateProjectResponse'
         '400':
           description: ''
           content:
@@ -457,6 +457,8 @@ tags:
   - name: Health
     description: ''
   - name: Security
+    description: ''
+  - name: Resources
     description: ''
 servers:
   - url: https://templi.vercel.app
@@ -589,6 +591,13 @@ components:
         - isPrivate
         - installationId
         - values
+    GenerateProjectResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
     GenerateProjectPayload:
       type: object
       properties:

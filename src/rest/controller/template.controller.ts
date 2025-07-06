@@ -16,6 +16,7 @@ import {
 } from '../swagger/decorator';
 import {
   GenerateProjectPayload,
+  GenerateProjectResponse,
   GenerateWithPersistedTemplate,
   Template,
 } from '../model';
@@ -87,7 +88,7 @@ export class TemplateController {
   @Authenticated()
   @ApiRequiredSpec({
     operationId: 'generateProjectWithTemplate',
-    type: GenerateWithPersistedTemplate,
+    type: GenerateProjectResponse,
   })
   @ApiBody({ type: GenerateWithPersistedTemplate })
   async generateTemplatesWithTemplate(
@@ -110,7 +111,7 @@ export class TemplateController {
   @Authenticated()
   @ApiRequiredSpec({
     operationId: 'generateProject',
-    type: GenerateProjectPayload,
+    type: GenerateProjectResponse,
   })
   @ApiBody({ type: GenerateProjectPayload })
   async generateTemplates(

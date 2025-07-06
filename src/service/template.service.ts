@@ -57,17 +57,25 @@ export class TemplateService {
       githubInstallation,
     );
 
+    const response = { url: '' };
+
     if (githubInstallation.isOrg) {
-      await octokit.repos.createInOrg({
+      const {
+        data: { html_url },
+      } = await octokit.repos.createInOrg({
         org: githubInstallation.orgName,
         name: generatePayload.repositoryName,
         private: generatePayload.isPrivateRepository,
       });
+      response.url = html_url;
     } else {
-      await octokit.repos.createForAuthenticatedUser({
+      const {
+        data: { html_url },
+      } = await octokit.repos.createForAuthenticatedUser({
         name: generatePayload.repositoryName,
         private: generatePayload.isPrivateRepository,
       });
+      response.url = html_url;
     }
 
     await this.createWorkflowToGenerateProject(
@@ -76,7 +84,7 @@ export class TemplateService {
       generatePayload,
     );
 
-    return generatePayload;
+    return response;
   }
 
   private async createOctokit(

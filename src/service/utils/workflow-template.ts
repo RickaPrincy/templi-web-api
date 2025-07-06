@@ -36,15 +36,22 @@ jobs:
       - name: Install Templi
         run: |
           mkdir -p /tmp/templi
-          curl -L -o /tmp/templi/templi-cli-linux-x86_64@4.1.1.tar.gz https://github.com/RickaPrincy/Templi/releases/download/v4.1.1/templi-cli-linux-x86_64@4.1.1.tar.gz
-          tar -xzf /tmp/templi/templi-cli-linux-x86_64@4.1.1.tar.gz -C /tmp/templi
-          echo "/tmp/templi/templi-cli-linux-x86_64@4.1.1/bin" >> $GITHUB_PATH
+          curl -L -o /tmp/templi/templi-cli-linux-x86_64@4.1.2.tar.gz https://github.com/RickaPrincy/Templi/releases/download/v4.1.2/templi-cli-linux-x86_64@4.1.2.tar.gz
+          tar -xzf /tmp/templi/templi-cli-linux-x86_64@4.1.2.tar.gz -C /tmp/templi
+          echo "/tmp/templi/templi-cli-linux-x86_64@4.1.2/bin" >> $GITHUB_PATH
       
       - name: Generate project 
         run: |
           git config user.name "templi-web[bot]"
           git config user.email "${process.env.GITHUB_EMAIL_ID}+templi-web[bot]@users.noreply.github.com"
           templi generate -t ${generateTemplate.templateUrl}.git ${generateTemplate.scope ? `-s ${generateTemplate.scope}` : ''} -o generated ${formatCliArgs(generateTemplate)}
+      
+      - name: Delete .git folder if it exists in generated
+        run: |
+          cd generated
+          if [ -d ".git" ]; then
+            rm -rf .git
+          fi
 
       - name: Move generated files to root
         run: |

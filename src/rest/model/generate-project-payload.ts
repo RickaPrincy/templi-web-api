@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsString, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 
 export class GenerateProjectPayloadValue {
   @ApiProperty()
@@ -15,6 +21,7 @@ export class GenerateProjectPayload {
   @ApiProperty()
   templateUrl: string;
 
+  @IsOptional()
   @IsString()
   @ApiProperty()
   scope: string;
