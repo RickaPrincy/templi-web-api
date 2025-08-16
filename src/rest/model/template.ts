@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { Tag } from './tag';
 
 export class Template {
   @IsUUID()
@@ -30,4 +37,8 @@ export class Template {
   @IsDateString()
   @ApiProperty({ format: 'date-time' })
   updatedAt: string;
+
+  @ValidateNested()
+  @ApiProperty({ type: [Tag] })
+  tags: Tag[];
 }

@@ -4,10 +4,10 @@ import {
   Get,
   NotFoundException,
   Param,
+  ParseArrayPipe,
   Put,
   Query,
 } from '@nestjs/common';
-import { ILike } from 'typeorm';
 import { TemplateService } from 'src/service';
 import {
   ApiCriteria,
@@ -53,14 +53,20 @@ export class TemplateController {
   @Get('/templates')
   @ApiPagination()
   @ApiRequiredSpec({ operationId: 'getTemplates', type: [Template] })
-  @ApiCriteria({ type: 'string', name: 'name' })
+  @ApiCriteria(
+    { type: 'string', name: 'name' },
+    { type: 'string', name: 'tags', isArray: true },
+  )
   @ApiPagination()
   async findTemplates(
     @Pagination() pagination: PaginationParams,
     @Query('name') name: string,
+    @Query('tags', new ParseArrayPipe({ items: String, separator: ',' }))
+    tags: string[],
   ) {
     const templates = await this.templateService.findAll(pagination, {
-      name: name ? ILike(`%${name}%`) : undefined,
+      name,
+      tags,
     });
 
     return Promise.all(

@@ -3,29 +3,17 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Tag } from './tag.entity';
 
 @Entity()
-export class Template {
+export class Tag {
   @PrimaryColumn()
   id: string;
 
-  @Column({ name: 'name' })
+  @Column()
   name: string;
-
-  @Column({ name: 'url' })
-  url: string;
-
-  @Column({ name: 'description' })
-  description: string;
-
-  @Column({ nullable: true })
-  scope?: string;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -44,12 +32,4 @@ export class Template {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date;
-
-  @ManyToMany(() => Tag, { cascade: true, eager: true })
-  @JoinTable({
-    name: 'template_tag',
-    joinColumn: { name: 'template_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
-  })
-  tags: Tag[];
 }

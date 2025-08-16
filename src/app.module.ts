@@ -7,6 +7,7 @@ import {
   HealthModule,
   GithubModule,
   TemplateModule,
+  TagModule,
 } from './module';
 import { DatabaseModule } from './module/database';
 
@@ -20,6 +21,7 @@ import { DatabaseModule } from './module/database';
     HealthModule,
     GithubModule,
     GithubInstallationModule,
+    TagModule,
     TemplateModule,
   ],
 })

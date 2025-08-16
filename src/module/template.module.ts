@@ -6,12 +6,14 @@ import { GenerateProjectMapper, TemplateMapper } from 'src/rest/mapper';
 import { TemplateService } from 'src/service';
 import { GithubModule } from './github.module';
 import { GithubInstallationModule } from './github-installation.module';
+import { TagModule } from './tag.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Template]),
     GithubModule,
     GithubInstallationModule,
+    TagModule,
   ],
   controllers: [TemplateController],
   providers: [TemplateService, GenerateProjectMapper, TemplateMapper],

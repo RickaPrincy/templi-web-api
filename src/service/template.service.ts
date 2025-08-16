@@ -3,17 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Octokit } from '@octokit/rest';
 import { Repository } from 'typeorm';
 
-import { Criteria } from './utils/criteria';
 import { GithubService } from './github';
 import { GenerateProject } from './model';
 import { PaginationParams } from './../rest/decorator';
 import { GithubInstallation, Template } from 'src/model';
 import { GithubInstallationService } from './github-installation.service';
 
-import { findByCriteria } from './utils/find-by-criteria';
 import { generateWorkflowFile } from 'src/service/utils/workflow-template';
-import { UPDATED_AT_CREATED_AT_ORDER_BY } from './utils/default-order-by';
 import { cryptoUtil } from './utils/crypto';
+import { createPagination } from './utils/create-pagination';
 
 @Injectable()
 export class TemplateService {
@@ -24,13 +22,31 @@ export class TemplateService {
     private readonly githubInstallationService: GithubInstallationService,
   ) {}
 
-  async findAll(pagination: PaginationParams, criteria: Criteria<Template>) {
-    return findByCriteria<Template>({
-      repository: this.repository,
-      criteria,
-      pagination,
-      order: UPDATED_AT_CREATED_AT_ORDER_BY,
-    });
+  async findAll(
+    pagination: PaginationParams,
+    criteria: { name?: string; tags?: string[] },
+  ) {
+    const qb = this.repository
+      .createQueryBuilder('template')
+      .leftJoinAndSelect('template.tags', 'tag');
+
+    if (criteria?.name !== undefined) {
+      qb.andWhere('template.name ILIKE :name', { name: `%${criteria.name}%` });
+    }
+
+    if (criteria.tags && criteria.tags.length > 0) {
+      criteria.tags.forEach((t, idx) => {
+        if (idx === 0) {
+          qb.andWhere('tag.name ILIKE :tag0', { tag0: `%${t}%` });
+        } else {
+          qb.orWhere(`tag.name ILIKE :tag${idx}`, { [`tag${idx}`]: `%${t}%` });
+        }
+      });
+    }
+
+    const paginationValue = createPagination(pagination);
+    qb.skip(paginationValue.skip).take(paginationValue.take);
+    return qb.getMany();
   }
 
   async findById(id: string) {
