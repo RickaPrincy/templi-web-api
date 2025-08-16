@@ -61,8 +61,11 @@ export class TemplateController {
   async findTemplates(
     @Pagination() pagination: PaginationParams,
     @Query('name') name: string,
-    @Query('tags', new ParseArrayPipe({ items: String, separator: ',' }))
-    tags: string[],
+    @Query(
+      'tags',
+      new ParseArrayPipe({ items: String, separator: ',', optional: true }),
+    )
+    tags?: string[],
   ) {
     const templates = await this.templateService.findAll(pagination, {
       name,
