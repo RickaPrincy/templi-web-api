@@ -20,7 +20,7 @@ export class TemplateService {
     private readonly repository: Repository<Template>,
     private readonly githubService: GithubService,
     private readonly githubInstallationService: GithubInstallationService,
-  ) {}
+  ) { }
 
   async findAll(
     pagination: PaginationParams,
@@ -37,9 +37,9 @@ export class TemplateService {
     if (criteria.tags && criteria.tags.length > 0) {
       criteria.tags.forEach((t, idx) => {
         if (idx === 0) {
-          qb.andWhere('tag.name ILIKE :tag0', { tag0: `%${t}%` });
+          qb.andWhere('tag.name = :tag0', { tag0: t });
         } else {
-          qb.orWhere(`tag.name ILIKE :tag${idx}`, { [`tag${idx}`]: `%${t}%` });
+          qb.orWhere(`tag.name = :tag${idx}`, { [`tag${idx}`]: t });
         }
       });
     }
