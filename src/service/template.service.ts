@@ -20,7 +20,7 @@ export class TemplateService {
     private readonly repository: Repository<Template>,
     private readonly githubService: GithubService,
     private readonly githubInstallationService: GithubInstallationService,
-  ) { }
+  ) {}
 
   async findAll(
     pagination: PaginationParams,
